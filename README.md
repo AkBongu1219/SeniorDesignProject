@@ -10,5 +10,7 @@ The face_recognizer.py is the main script. The script will recognize the face ac
 Make sure to pip install the following:
 
 pip install opencv-python
+
 pip install opencv-contrib-python --upgrade or pip install opencv-contrib-python
+
 pip install pillow
