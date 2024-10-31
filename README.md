@@ -1,4 +1,4 @@
-** Hardware: **
+## Hardware: 
 
 Rasberry Pi 5 - core unit between all appliances and user  
 
