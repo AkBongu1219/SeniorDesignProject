@@ -1,0 +1,59 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+// Wi-Fi and server details
+const char* ssid = "Abc";         // Wi-Fi SSID
+const char* password = "12345678"; // Wi-Fi Password
+const char* serverName = "http://172.20.10.2:5000/motion-data";  // Raspberry Pi IP address
+
+const int pirPin = 27;  // GPIO pin for HC-SR501 motion sensor
+int previousState = LOW;  // To track previous motion state
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(pirPin, INPUT);  // Set PIR pin as input
+
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nConnected to Wi-Fi");
+}
+
+void loop() {
+  int motionDetected = digitalRead(pirPin);  // Read motion sensor
+
+  // Only send data if motion state changes
+  if (motionDetected != previousState) {
+    if (motionDetected == HIGH) {  // Motion detected
+      Serial.println("Motion Detected!");
+
+      // Send data if Wi-Fi is connected
+      if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        http.begin(serverName);  // Connect to server
+        http.addHeader("Content-Type", "application/json");
+
+        // Send JSON data to server
+        int httpResponseCode = http.POST("{\"motion\": \"detected\"}");
+
+        // Check response code
+        if (httpResponseCode > 0) {
+          Serial.print("POST Response Code: ");
+          Serial.println(httpResponseCode);
+        } else {
+          Serial.print("Error Code: ");
+          Serial.println(httpResponseCode);
+        }
+        http.end();  // Close connection
+      }
+    } else {
+      Serial.println("No Motion");  // No motion detected
+    }
+    previousState = motionDetected;  // Update state
+  }
+  delay(500);  // Check every 500ms
+}
