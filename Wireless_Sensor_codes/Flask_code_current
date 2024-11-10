@@ -2,11 +2,24 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Store latest data from BME688 and motion sensor
+# Store the latest data from BME688 and motion sensor
 latest_data = {
     "BME688": {"temperature": None, "humidity": None, "pressure": None, "gas_resistance": None},
     "motion": "no motion"
 }
+
+# Endpoint for receiving BME688 data
+@app.route('/bme688-data', methods=['POST'])
+def receive_bme688_data():
+    data = request.get_json()
+    latest_data["BME688"] = {
+        "temperature": data.get("temperature"),
+        "humidity": data.get("humidity"),
+        "pressure": data.get("pressure"),
+        "gas_resistance": data.get("gas_resistance")
+    }
+    print("Received BME688 Data:", latest_data["BME688"])
+    return jsonify({"status": "success"})
 
 # Endpoint for receiving motion data
 @app.route('/motion-data', methods=['POST'])
@@ -16,7 +29,7 @@ def receive_motion_data():
     print("Received Motion Data:", latest_data["motion"])
     return jsonify({"status": "success"})
 
-# Endpoint to retrieve latest data from both sensors
+# Endpoint to retrieve the latest data from both sensors
 @app.route('/latest-data', methods=['GET'])
 def get_latest_data():
     return jsonify(latest_data)
