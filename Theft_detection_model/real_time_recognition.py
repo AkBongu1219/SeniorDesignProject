@@ -3,11 +3,11 @@ import cv2
 import pickle
 from picamera2 import Picamera2
 
-# Load saved face image 
-with open("face1.jpg", "rb") as file:
+# Load saved face encoding
+with open("your_face_encoding.pkl", "rb") as file:
     known_face_encoding = pickle.load(file)
 
-# Initialiing camera 
+# Initializing camera 
 picam2 = Picamera2()
 picam2.configure(picam2.create_preview_configuration())
 picam2.start()
@@ -25,7 +25,7 @@ while True:
     face_locations = face_recognition.face_locations(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
-    # Loop through each face found in the frame
+    # Looping through each face found in the frame
     for face_encoding in face_encodings:
         # Compare the detected face to the known face encoding
         matches = face_recognition.compare_faces([known_face_encoding], face_encoding)
@@ -43,6 +43,6 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Release resources
+# Stopping camera 
 picam2.stop()
 cv2.destroyAllWindows()
