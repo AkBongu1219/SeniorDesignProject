@@ -4,7 +4,7 @@ import pickle
 from picamera2 import Picamera2
 
 # Load saved face encoding
-with open("your_face_encoding.pkl", "rb") as file:
+with open("face_encoding.pkl", "rb") as file:
     known_face_encoding = pickle.load(file)
 
 # Initializing camera 
