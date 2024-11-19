@@ -4,22 +4,37 @@ import io from 'socket.io-client';
 
 const TheftDetectionScreen = () => {
   const [alerts, setAlerts] = useState([]);
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
 
   useEffect(() => {
-  
     const socket = io('http://172.20.10.2:5002');
 
-  
     socket.on('alert', (data) => {
       console.log('Alert received:', data.message);
-      setAlerts((prevAlerts) => [data.message, ...prevAlerts]);
-      Alert.alert('Theft Detection Alert', data.message); 
+
+      // Prevent multiple alerts
+      if (!isAlertVisible) {
+        setIsAlertVisible(true);
+        setAlerts((prevAlerts) => [data.message, ...prevAlerts]);
+
+        Alert.alert(
+          'Theft Detection Alert',
+          data.message,
+          [
+            {
+              text: 'OK',
+              onPress: () => setIsAlertVisible(false), // Dismiss and allow new alerts
+            },
+          ],
+          { cancelable: false }
+        );
+      }
     });
 
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [isAlertVisible]);
 
   return (
     <View style={styles.container}>
