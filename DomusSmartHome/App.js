@@ -3,7 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, Button } from 'react-native';
 import SensorDataScreen from './screens/SensorDataScreen';
-import TheftDetectionScreen from './screens/TheftDetectionScreen'; // Import the new screen
+import TheftDetectionScreen from './screens/TheftDetectionScreen';
+import SmartPlugScreen from './screens/SmartPlugScreen'; // Import the new screen
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,10 @@ const HomeScreen = ({ navigation }) => (
       title="Go to Theft Detection"
       onPress={() => navigation.navigate('TheftDetection')}
     />
+    <Button
+      title="Go to Smart Plug"
+      onPress={() => navigation.navigate('SmartPlug')}
+    />
   </View>
 );
 
@@ -28,6 +33,7 @@ const App = () => {
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />
         <Stack.Screen name="SensorData" component={SensorDataScreen} options={{ title: 'Sensor Data' }} />
         <Stack.Screen name="TheftDetection" component={TheftDetectionScreen} options={{ title: 'Theft Detection' }} />
+        <Stack.Screen name="SmartPlug" component={SmartPlugScreen} options={{ title: 'Smart Plug' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
