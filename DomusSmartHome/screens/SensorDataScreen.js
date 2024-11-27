@@ -1,57 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { SafeAreaView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 
 const SensorDataScreen = () => {
   const [temperature, setTemperature] = useState('--');
   const [humidity, setHumidity] = useState('--');
   const [pressure, setPressure] = useState('--');
   const [gasResistance, setGasResistance] = useState('--');
-  const [motion, setMotion] = useState('--');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Correct the API URL to use the /latest-data endpoint
-    const apiUrl = 'http://172.20.10.2:5000/latest-data';
-  
+    const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; // Change this to match your Pi's IP
     const fetchData = async () => {
       try {
-        console.log("Attempting to fetch data from", apiUrl);
-        const response = await fetch(apiUrl);
-  
-        // Check if the response is ok (status code 200-299)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-  
+        const response = await fetch(bme688ApiUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log("Data received:", data);
-        setTemperature(data.BME688.temperature);
-        setHumidity(data.BME688.humidity);
-        setPressure(data.BME688.pressure);
-        setGasResistance(data.BME688.gas_resistance);
-        setMotion(data.motion);
+        setTemperature(data.temperature);
+        setHumidity(data.humidity);
+        setPressure(data.pressure);
+        setGasResistance(data.gas_resistance);
       } catch (error) {
-        console.error('Error fetching sensor data:', error);
+        console.error('Error fetching BME688 data:', error);
       } finally {
         setLoading(false);
       }
     };
-  
     fetchData();
   }, []);
+
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Sensor Data</Text>
       <Text style={styles.text}>Temperature: {temperature} °C</Text>
       <Text style={styles.text}>Humidity: {humidity} %</Text>
       <Text style={styles.text}>Pressure: {pressure} hPa</Text>
       <Text style={styles.text}>Gas Resistance: {gasResistance} Ω</Text>
-      <Text style={styles.text}>Motion: {motion}</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 
