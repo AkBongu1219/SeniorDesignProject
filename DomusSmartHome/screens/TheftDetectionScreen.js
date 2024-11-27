@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import io from 'socket.io-client';
 
 const TheftDetectionScreen = () => {
@@ -8,36 +8,25 @@ const TheftDetectionScreen = () => {
 
   useEffect(() => {
     const socket = io('http://172.20.10.2:5002');
-
     socket.on('alert', (data) => {
-      console.log('Alert received:', data.message);
-
-      // Prevent multiple alerts
       if (!isAlertVisible) {
         setIsAlertVisible(true);
         setAlerts((prevAlerts) => [data.message, ...prevAlerts]);
-
-        Alert.alert(
-          'Theft Detection Alert',
-          data.message,
-          [
-            {
-              text: 'OK',
-              onPress: () => setIsAlertVisible(false), // Dismiss and allow new alerts
-            },
-          ],
-          { cancelable: false }
-        );
+        Alert.alert('Theft Detection Alert', data.message, [
+          {
+            text: 'OK',
+            onPress: () => setIsAlertVisible(false),
+          },
+        ]);
       }
     });
-
     return () => {
       socket.disconnect();
     };
   }, [isAlertVisible]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Theft Detection Alerts</Text>
       <ScrollView style={styles.alertsContainer}>
         {alerts.map((alert, index) => (
@@ -46,7 +35,7 @@ const TheftDetectionScreen = () => {
           </Text>
         ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
