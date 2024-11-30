@@ -6,25 +6,36 @@ const SensorDataScreen = () => {
   const [humidity, setHumidity] = useState('--');
   const [pressure, setPressure] = useState('--');
   const [gasResistance, setGasResistance] = useState('--');
+  const [motion, setMotion] = useState('--');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; // Change this to match your Pi's IP
+    const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; // Replace with your Pi's IP for BME688
+    const motionApiUrl = 'http://172.20.10.2:5000/motion-latest'; // Replace with your Pi's IP for Motion
+
     const fetchData = async () => {
       try {
-        const response = await fetch(bme688ApiUrl);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        setTemperature(data.temperature);
-        setHumidity(data.humidity);
-        setPressure(data.pressure);
-        setGasResistance(data.gas_resistance);
+        // Fetch BME688 data
+        const responseBME = await fetch(bme688ApiUrl);
+        if (!responseBME.ok) throw new Error(`BME688 HTTP error! status: ${responseBME.status}`);
+        const dataBME = await responseBME.json();
+        setTemperature(dataBME.temperature);
+        setHumidity(dataBME.humidity);
+        setPressure(dataBME.pressure);
+        setGasResistance(dataBME.gas_resistance);
+
+        // Fetch motion data
+        const responseMotion = await fetch(motionApiUrl);
+        if (!responseMotion.ok) throw new Error(`Motion HTTP error! status: ${responseMotion.status}`);
+        const dataMotion = await responseMotion.json();
+        setMotion(dataMotion.motion);
       } catch (error) {
-        console.error('Error fetching BME688 data:', error);
+        console.error('Error fetching sensor data:', error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -43,6 +54,7 @@ const SensorDataScreen = () => {
       <Text style={styles.text}>Humidity: {humidity} %</Text>
       <Text style={styles.text}>Pressure: {pressure} hPa</Text>
       <Text style={styles.text}>Gas Resistance: {gasResistance} Ω</Text>
+      <Text style={styles.text}>Motion: {motion}</Text>
     </SafeAreaView>
   );
 };
