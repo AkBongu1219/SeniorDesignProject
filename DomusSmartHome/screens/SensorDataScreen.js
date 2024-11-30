@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 
+// Component to display sensor data fetched from Flask backend
 const SensorDataScreen = () => {
+  // State variables to store sensor readings
   const [temperature, setTemperature] = useState('--');
   const [humidity, setHumidity] = useState('--');
   const [pressure, setPressure] = useState('--');
   const [gasResistance, setGasResistance] = useState('--');
   const [motion, setMotion] = useState('--');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Tracks if data is still loading
 
   useEffect(() => {
-    const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; // Replace with your Pi's IP for BME688
-    const motionApiUrl = 'http://172.20.10.2:5000/motion-latest'; // Replace with your Pi's IP for Motion
+    const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; 
+    const motionApiUrl = 'http://172.20.10.2:5000/motion-latest'; 
 
     const fetchData = async () => {
       try {
-        // Fetch BME688 data
+        // Fetch BME688 sensor data
         const responseBME = await fetch(bme688ApiUrl);
         if (!responseBME.ok) throw new Error(`BME688 HTTP error! status: ${responseBME.status}`);
         const dataBME = await responseBME.json();
@@ -32,13 +34,14 @@ const SensorDataScreen = () => {
       } catch (error) {
         console.error('Error fetching sensor data:', error);
       } finally {
-        setLoading(false);
+        setLoading(false); // Stop loading indicator once data is fetched
       }
     };
 
     fetchData();
-  }, []);
+  }, []); // Run once when the component is mounted
 
+  // Show loading indicator until data is fetched
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -47,6 +50,7 @@ const SensorDataScreen = () => {
     );
   }
 
+  // Render sensor data once loaded
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Sensor Data</Text>
@@ -59,6 +63,7 @@ const SensorDataScreen = () => {
   );
 };
 
+// Styles for the UI layout
 const styles = StyleSheet.create({
   container: {
     flex: 1,
