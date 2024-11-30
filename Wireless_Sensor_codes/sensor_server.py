@@ -52,5 +52,47 @@ def get_latest_bme688_data():
     else:
         return jsonify({"error": "No data available"}), 404
 
+# Endpoint for receiving motion data and storing it in the database
+@app.route('/motion-data', methods=['POST'])
+def receive_motion_data():
+    data = request.get_json()
+    motion_status = data.get("motion", "no motion")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Insert the received motion data into the MotionData table
+    cursor.execute('''
+        INSERT INTO MotionData (timestamp, motion)
+        VALUES (?, ?)
+    ''', (
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        motion_status
+    ))
+    conn.commit()
+    conn.close()
+
+    print("Received Motion Data and stored in DB:", motion_status)
+    return jsonify({"status": "success"})
+
+# Endpoint to retrieve the latest motion data
+@app.route('/motion-latest', methods=['GET'])
+def get_latest_motion_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the most recent motion data entry
+    cursor.execute('''
+        SELECT motion, timestamp FROM MotionData
+        ORDER BY timestamp DESC LIMIT 1
+    ''')
+    data = cursor.fetchone()
+    conn.close()
+
+    if data:
+        return jsonify({"motion": data[0], "timestamp": data[1]})
+    else:
+        return jsonify({"motion": "no motion", "timestamp": None})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
