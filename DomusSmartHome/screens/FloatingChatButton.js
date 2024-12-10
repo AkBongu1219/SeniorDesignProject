@@ -2,69 +2,93 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, View, Modal, TextInput, Button, Text } from "react-native";
 import io from "socket.io-client";
 
-// Main component for the floating chat button
+// Sensor data API URLs
+const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; 
+const motionApiUrl = 'http://172.20.10.2:5000/motion-latest';
+
 const FloatingChatButton = () => {
-  // State for chat modal visibility
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false); // Chat visibility
+  const [question, setQuestion] = useState(""); // User input
+  const [response, setResponse] = useState(""); // Chatbot response
+  const [socket, setSocket] = useState(null); // WebSocket connection
+  const [sensorData, setSensorData] = useState({
+    temperature: "--",
+    humidity: "--",
+    pressure: "--",
+    gasResistance: "--",
+    motion: "--",
+  }); // Store fetched sensor data
 
-  // State for storing user input and chatbot responses
-  const [question, setQuestion] = useState("");
-  const [response, setResponse] = useState("");
-
-  // State for WebSocket connection
-  const [socket, setSocket] = useState(null);
-
-  // Effect to initialize WebSocket connection
+  // Initialize WebSocket
   useEffect(() => {
-    const newSocket = io("http://localhost:5001"); // Connect to WebSocket server
+    const newSocket = io("http://localhost:5001");
     setSocket(newSocket);
 
-    // Cleanup WebSocket connection when the component unmounts
     return () => {
       newSocket.disconnect();
     };
   }, []);
 
-  // Open the chat modal
-  const handleOpenChat = () => {
-    setIsChatOpen(true);
-  };
+  // Fetch live sensor data
+  const fetchSensorData = async () => {
+    try {
+      // Fetch BME688 sensor data
+      const responseBME = await fetch(bme688ApiUrl);
+      const dataBME = await responseBME.json();
 
-  // Close the chat modal and reset states
-  const handleCloseChat = () => {
-    setIsChatOpen(false);
-    setQuestion("");
-    setResponse("");
-  };
+      // Fetch motion data
+      const responseMotion = await fetch(motionApiUrl);
+      const dataMotion = await responseMotion.json();
 
-  // Send user input to the WebSocket server
-  const handleSend = () => {
-    if (socket && question.trim()) {
-      socket.emit("message", { prompt: question }); // Emit the user's query
-      socket.on("response", (data) => {
-        if (data.message) {
-          setResponse(data.message); // Display response from the server
-        } else {
-          setResponse(data.error || "Failed to fetch response."); // Handle errors
-        }
+      // Update state with fetched data
+      setSensorData({
+        temperature: dataBME.temperature,
+        humidity: dataBME.humidity,
+        pressure: dataBME.pressure,
+        gasResistance: dataBME.gas_resistance,
+        motion: dataMotion.motion,
       });
+    } catch (error) {
+      console.error("Error fetching sensor data:", error);
+    }
+  };
+
+  // Handle chat queries
+  const handleSend = async () => {
+    if (!question.trim()) return;
+
+    // Check for sensor-related queries
+    if (question.toLowerCase().includes("temperature")) {
+      await fetchSensorData();
+      setResponse(`The current temperature is ${sensorData.temperature} °C.`);
+    } else if (question.toLowerCase().includes("humidity")) {
+      await fetchSensorData();
+      setResponse(`The current humidity is ${sensorData.humidity}%.`);
+    } else if (question.toLowerCase().includes("motion")) {
+      await fetchSensorData();
+      setResponse(`Motion detected: ${sensorData.motion}.`);
+    } else {
+      // Send other queries to the LLM
+      if (socket) {
+        socket.emit("message", { prompt: question });
+        socket.on("response", (data) => {
+          setResponse(data.message || "No response from the server.");
+        });
+      }
     }
   };
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Floating button to open the chat */}
-      <TouchableOpacity style={styles.floatingButton} onPress={handleOpenChat}>
-        <Text style={styles.buttonText}>D</Text> {/* 'D' for Domus */}
+      <TouchableOpacity style={styles.floatingButton} onPress={() => setIsChatOpen(true)}>
+        <Text style={styles.buttonText}>D</Text>
       </TouchableOpacity>
 
-      {/* Modal for chat interaction */}
       <Modal visible={isChatOpen} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.chatContainer}>
-            <Text style={styles.title}>Ask Domus</Text> {/* Modal title */}
-            
-            {/* Input field for user queries */}
+            <Text style={styles.title}>Ask Domus</Text>
+
             <TextInput
               style={styles.input}
               placeholder="Type your question..."
@@ -72,18 +96,15 @@ const FloatingChatButton = () => {
               onChangeText={setQuestion}
             />
 
-            {/* Button to send the query */}
             <Button title="Send" onPress={handleSend} />
 
-            {/* Display chatbot response */}
             {response && (
               <Text style={styles.response}>
                 <Text style={styles.responseLabel}>Response:</Text> {response}
               </Text>
             )}
 
-            {/* Button to close the modal */}
-            <TouchableOpacity style={styles.closeButton} onPress={handleCloseChat}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setIsChatOpen(false)}>
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
           </View>
@@ -93,7 +114,7 @@ const FloatingChatButton = () => {
   );
 };
 
-// Styles for the floating button and modal
+// User Interface 
 const styles = StyleSheet.create({
   floatingButton: {
     position: "absolute",

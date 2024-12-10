@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
+import threading
 
 app = Flask(__name__)
 
@@ -9,6 +10,32 @@ def get_db_connection():
     conn = sqlite3.connect('smart_home.db')
     conn.row_factory = sqlite3.Row  # Enables dict-like access to rows
     return conn
+
+# Global variable to track the last motion detection time
+last_motion_time = None
+
+# Function to reset motion status to "no motion" after 3 seconds
+def reset_motion_status():
+    global last_motion_time
+    while True:
+        if last_motion_time and datetime.now() - last_motion_time > timedelta(seconds=3):
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO MotionData (timestamp, motion)
+                VALUES (?, ?)
+            ''', (
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "no motion"
+            ))
+            conn.commit()
+            conn.close()
+            print("Motion reset to 'no motion'")
+            last_motion_time = None
+
+# Start the reset_motion_status function in a background thread
+reset_thread = threading.Thread(target=reset_motion_status, daemon=True)
+reset_thread.start()
 
 # Endpoint for receiving BME688 data and storing it in the database
 @app.route('/bme688-data', methods=['POST'])
@@ -55,6 +82,7 @@ def get_latest_bme688_data():
 # Endpoint for receiving motion data and storing it in the database
 @app.route('/motion-data', methods=['POST'])
 def receive_motion_data():
+    global last_motion_time
     data = request.get_json()
     motion_status = data.get("motion", "no motion")
 
@@ -73,6 +101,11 @@ def receive_motion_data():
     conn.close()
 
     print("Received Motion Data and stored in DB:", motion_status)
+
+    # Update the last motion detection time if motion is detected
+    if motion_status == "motion detected":
+        last_motion_time = datetime.now()
+
     return jsonify({"status": "success"})
 
 # Endpoint to retrieve the latest motion data
