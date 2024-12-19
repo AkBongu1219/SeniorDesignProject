@@ -6,8 +6,6 @@ HC-SR501 - motion detection
 
 MakerFocus Raspberry Pi 4B Camera - real time theft detection and sending alerts 
 
-DHT 22 - temperature and humidity data of the household 
-
-BME-688 - Air Qaulity sensing 
+BME-688 - Temperature, Humidity, Air Qaulity sensing 
 
 
