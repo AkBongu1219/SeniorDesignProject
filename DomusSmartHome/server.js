@@ -10,7 +10,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 // OpenAI API configuration
 const openai = new OpenAI({
-    apiKey: "OpenAI API", //OpenAI API key
+    apiKey: "", //OpenAI API key
 });
 
 // WebSocket event handler
