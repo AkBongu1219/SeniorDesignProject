@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, View, Modal, TextInput, Button, Text } from "react-native";
+import { View, TextInput, StyleSheet, Button, Text, Modal, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import io from "socket.io-client";
+import axios from "axios";
 
-// Sensor data API URLs
-const bme688ApiUrl = 'http://172.20.10.2:5000/bme688-latest'; 
-const motionApiUrl = 'http://172.20.10.2:5000/motion-latest';
+// API URLs
+const SOCKET_SERVER_URL = "http://localhost:5001"; // LLM WebSocket server
+const BME688_API_URL = "http://172.20.10.2:5000/bme688-latest"; 
+const MOTION_API_URL = "http://172.20.10.2:5000/motion-latest";
+const ENERGY_API_URL = "http://10.0.0.25:8080/energy"; // Smart plug energy data API
 
-const FloatingChatButton = () => {
-  const [isChatOpen, setIsChatOpen] = useState(false); // Chat visibility
-  const [question, setQuestion] = useState(""); // User input
-  const [response, setResponse] = useState(""); // Chatbot response
-  const [socket, setSocket] = useState(null); // WebSocket connection
+const LLMSection = () => {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [response, setResponse] = useState("");
+  const [socket, setSocket] = useState<any>(null);
   const [sensorData, setSensorData] = useState({
     temperature: "--",
     humidity: "--",
     pressure: "--",
     gasResistance: "--",
     motion: "--",
-  }); // Store fetched sensor data
+    energy: "--",
+  });
 
-  // Initialize WebSocket
   useEffect(() => {
-    const newSocket = io("http://localhost:5001");
+    const newSocket = io(SOCKET_SERVER_URL);
     setSocket(newSocket);
 
     return () => {
@@ -29,35 +32,38 @@ const FloatingChatButton = () => {
     };
   }, []);
 
-  // Fetch live sensor data
   const fetchSensorData = async () => {
     try {
-      // Fetch BME688 sensor data
-      const responseBME = await fetch(bme688ApiUrl);
-      const dataBME = await responseBME.json();
-
-      // Fetch motion data
-      const responseMotion = await fetch(motionApiUrl);
-      const dataMotion = await responseMotion.json();
-
-      // Update state with fetched data
-      setSensorData({
-        temperature: dataBME.temperature,
-        humidity: dataBME.humidity,
-        pressure: dataBME.pressure,
-        gasResistance: dataBME.gas_resistance,
-        motion: dataMotion.motion,
-      });
+      const responseBME = await axios.get(BME688_API_URL);
+      const responseMotion = await axios.get(MOTION_API_URL);
+      setSensorData((prev) => ({
+        ...prev,
+        temperature: responseBME.data.temperature,
+        humidity: responseBME.data.humidity,
+        pressure: responseBME.data.pressure,
+        gasResistance: responseBME.data.gas_resistance,
+        motion: responseMotion.data.motion,
+      }));
     } catch (error) {
-      console.error("Error fetching sensor data:", error);
+      Alert.alert("Error", "Failed to fetch sensor data.");
     }
   };
 
-  // Handle chat queries
+  const fetchEnergyData = async () => {
+    try {
+      const response = await axios.get(ENERGY_API_URL);
+      setSensorData((prev) => ({
+        ...prev,
+        energy: `Current Power: ${response.data.current_power}W, Total Energy: ${response.data.total_energy} kWh`,
+      }));
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch energy data.");
+    }
+  };
+
   const handleSend = async () => {
     if (!question.trim()) return;
 
-    // Check for sensor-related queries
     if (question.toLowerCase().includes("temperature")) {
       await fetchSensorData();
       setResponse(`The current temperature is ${sensorData.temperature} °C.`);
@@ -67,8 +73,10 @@ const FloatingChatButton = () => {
     } else if (question.toLowerCase().includes("motion")) {
       await fetchSensorData();
       setResponse(`Motion detected: ${sensorData.motion}.`);
+    } else if (question.toLowerCase().includes("power") || question.toLowerCase().includes("energy usage")) {
+      await fetchEnergyData();
+      setResponse(sensorData.energy);
     } else {
-      // Send other queries to the LLM
       if (socket) {
         socket.emit("message", { prompt: question });
         socket.on("response", (data) => {
@@ -79,10 +87,17 @@ const FloatingChatButton = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <TouchableOpacity style={styles.floatingButton} onPress={() => setIsChatOpen(true)}>
-        <Text style={styles.buttonText}>D</Text>
-      </TouchableOpacity>
+    <>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+        <TextInput
+          style={styles.input}
+          placeholder="Ask me anything..."
+          placeholderTextColor="#999"
+          value={question}
+          onChangeText={setQuestion}
+        />
+        <Button title="Send" onPress={handleSend} />
+      </KeyboardAvoidingView>
 
       <Modal visible={isChatOpen} transparent animationType="slide">
         <View style={styles.modalBackground}>
@@ -110,31 +125,30 @@ const FloatingChatButton = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </>
   );
 };
 
-// User Interface 
 const styles = StyleSheet.create({
-  floatingButton: {
+  container: {
     position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#4CAF50",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#f0f0f0",
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+    padding: 16,
+    flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
   },
-  buttonText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
+  input: {
+    flex: 1,
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginRight: 10,
   },
   modalBackground: {
     flex: 1,
@@ -157,13 +171,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15,
     textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
   },
   response: {
     marginTop: 15,
@@ -191,4 +198,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FloatingChatButton;
+export default LLMSection;
