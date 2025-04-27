@@ -235,26 +235,31 @@ The following tools and versions were used for building and testing the Domus Sm
 
 The diagram below illustrates the interaction between different software modules within the Domus Smart Home system:
 
-```mermaid
-graph TD
-    A[Domus Mobile App (React Native)]
-    B[Backend Server (Flask + SQLite)]
-    C[MotionSensor (ESP32)]
-    D[EnvironSensor (ESP32 + BME688)]
-    E[Vision Module (Object Detection + Face Recognition)]
-    F[Smart Power Plug (TP-Link KP115)]
-    G[LLM Backend (Node.js + OpenAI)]
-
-    A --> B
-    B --> C
-    B --> D
-    B --> E
-    B --> F
-    B --> G
-    G --> B
+```
+                +---------------------+
+                |   Domus Mobile App  |
+                |  (React Native CLI) |
+                +---------------------+
+                           |
+            (HTTP REST / WebSocket Communication)
+                           |
+                +---------------------+
+                |   Backend Server    |
+                |  (Flask + SQLite)   |
+                +---------------------+
+            |     |      |       |        |
+            |     |      |       |        |
++--------+  +--------+  +--------+  +--------+  +--------+
+| Motion |  | Environ|  | Vision |  | Smart  |  |  LLM   |
+|Sensor  |  |Sensor  |  |Module  |  | Power  |  |Backend |
+|(ESP32) |  |(ESP32 +|  |(Obj    |  | Plug   |  |(Node.js|
+|        |  | BME688)|  | Detect |  |(KP115) |  |+ OpenAI|
++--------+  +--------+  | +Face  |  +--------+  +--------+
+                        | Recog) |
+                         +--------+
 ```
 
-> ⚠️ **Note:** If the diagram does not render correctly on your platform, you may view the diagram in the project's Wiki or diagram assets folder if provided.
+> ⚠️ **Note:** Each module operates independently and communicates through the Backend Server. The LLM Backend queries the Backend for data to generate assistant responses.
 
 ---
 
