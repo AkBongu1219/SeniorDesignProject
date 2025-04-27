@@ -269,10 +269,10 @@ The diagram below illustrates the interaction between different software modules
 
 | Device Pairing                       | Home Dashboard                        |
 |----------------------------------------|----------------------------------------|
-| ![Pairing Screen](../../Documentation/App_Screenshots/pairing_screen.png) | ![Home Screen](../../Documentation/App_Screenshots/home_screen.png) |
+| ![Pairing Screen](../../Documentation/App_Screenshots/pairing_screen.PNG) | ![Home Screen](../../Documentation/App_Screenshots/home_screen.PNG) |
 
 ### Energy Graphs and Domus Assistant Query
 
 | Energy Graphs                         | Domus Assistant Query                 |
 |----------------------------------------|----------------------------------------|
-| ![Energy Graphs](../../Documentation/App_Screenshots/energy_graphs.png) | ![Assistant Chat](../../Documentation/App_Screenshots/assistant_chat.png) |
+| ![Energy Graphs](../../Documentation/App_Screenshots/energy_graphs.PNG) | ![Assistant Chat](../../Documentation/App_Screenshots/assistant_chat.PNG) |
