@@ -237,12 +237,20 @@ The diagram below illustrates the interaction between different software modules
 
 ```mermaid
 graph TD
-    A[Domus Mobile App (React Native)] -->|REST / WebSocket| B[Backend Server (Flask + SQLite)]
-    B --> C[MotionSensor (ESP32)]
-    B --> D[EnvironSensor (ESP32 + BME688)]
-    B --> E[Vision Module (Object Detection + Face Recognition)]
-    B --> F[Smart Power Plug (TP-Link KP115)]
-    B --> G[LLM Backend (Node.js + OpenAI)]
+    A[Domus Mobile App (React Native)]
+    B[Backend Server (Flask + SQLite)]
+    C[MotionSensor (ESP32)]
+    D[EnvironSensor (ESP32 + BME688)]
+    E[Vision Module (Object Detection + Face Recognition)]
+    F[Smart Power Plug (TP-Link KP115)]
+    G[LLM Backend (Node.js + OpenAI)]
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    B --> F
+    B --> G
     G --> B
 ```
 
@@ -256,10 +264,10 @@ graph TD
 
 | Device Pairing                       | Home Dashboard                        |
 |----------------------------------------|----------------------------------------|
-| ![Pairing Screen](./Frontend/Documentation/App_Screenshots/pairing_screen.png) | ![Home Screen](./Frontend/Documentation/App_Screenshots/home_screen.png) |
+| ![Pairing Screen](../../Documentation/App_Screenshots/pairing_screen.png) | ![Home Screen](../../Documentation/App_Screenshots/home_screen.png) |
 
 ### Energy Graphs and Domus Assistant Query
 
 | Energy Graphs                         | Domus Assistant Query                 |
 |----------------------------------------|----------------------------------------|
-| ![Energy Graphs](./Frontend/Documentation/App_Screenshots/energy_graphs.png) | ![Assistant Chat](./Frontend/Documentation/App_Screenshots/assistant_chat.png) |
+| ![Energy Graphs](../../Documentation/App_Screenshots/energy_graphs.png) | ![Assistant Chat](../../Documentation/App_Screenshots/assistant_chat.png) |

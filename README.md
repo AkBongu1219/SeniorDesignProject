@@ -81,6 +81,7 @@ These enhancements would increase flexibility, scalability, and robustness for l
    - Connect ESP32 sensors (motion, BME688) to wall sockets and ensure they are within Wi-Fi range.
    - Place the AI camera near desired surveillance areas.
    - Connect the Kasa Smart Plug to a power source and the local network.
+   - Refer to `README_HARDWARE.md` for detailed instructions.
 
 2. Software Setup:
    - Clone this repository to your local machine or Raspberry Pi:
