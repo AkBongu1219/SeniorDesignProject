@@ -24,9 +24,8 @@ All devices communicate over a local Wi-Fi network, providing seamless integrati
 
 The system architecture, including sensor nodes, camera module, and smart plug integration, is illustrated below:
 
-![Domus System Hardware Schematic](./Documentation/System_Diagram.png)
+![Domus System Hardware Schematic](../Documentation/System_Diagram.png)
 
-*Ensure that `System_Diagram.png` is placed in the `Documentation` folder of your repository.*
 
 ---
 
@@ -35,21 +34,20 @@ The system architecture, including sensor nodes, camera module, and smart plug i
 ### Domus Hardware Modules
 
 #### Domus EnvironSensor Module  
-![Domus EnvironSensor](./Documentation/System_Photos/environ_sensor.png)
+![Domus EnvironSensor](../Documentation/System_Photos/environ_sensor.png)
 
 #### Domus Vision Module  
-![Domus Vision Module](./Documentation/System_Photos/vision_module.png)
+![Domus Vision Module](../Documentation/System_Photos/vision_module.png)
 
 #### Domus Power Plug  
-![Domus Power Plug](./Documentation/System_Photos/power_plug.png)
+![Domus Power Plug](../Documentation/System_Photos/power_plug.png)
 
 #### Domus Central Hub (Raspberry Pi 5)  
-![Domus Central Hub](./Documentation/System_Photos/central_hub.png)
+![Domus Central Hub](../Documentation/System_Photos/central_hub.png)
 
 #### Domus Motion Sensor (HC-SR501)  
-![Domus Motion Sensor](./Documentation/System_Photos/motion_sensor.png)
+![Domus Motion Sensor](../Documentation/System_Photos/motion_sensor.png)
 
-*Place these images inside `Documentation/System_Photos/` as named above.*
 
 ---
 
