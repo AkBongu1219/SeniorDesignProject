@@ -86,10 +86,10 @@ These enhancements would increase flexibility, scalability, and robustness for l
 2. Software Setup:
    - Clone this repository to your local machine or Raspberry Pi:
      ```bash
-     git clone <repository-link>
+     git clone https://github.com/AkBongu1219/SeniorDesignProject
      ```
-   - Refer to `README_SOFTWARE.md` for detailed installation of dependencies and backend server setup.
-   - Deploy the Domus iOS app via TestFlight.
+   - For Domus device users: Directly deploy the Domus iOS app by following setup instructions on `README_SOFTWARE.md`.
+   - For manual setup, refer to `README_SOFTWARE.md`to setup backend.  
    - Log into the app using Google login.
    - Pair sensors via the "Devices" screen in the app.
 
